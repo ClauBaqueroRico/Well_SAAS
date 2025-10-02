@@ -206,7 +206,7 @@ export default function DashboardPage() {
             <div className="bg-white p-8 rounded-lg shadow text-center">
               <div className="text-gray-500">
                 <div className="text-lg mb-2">Selecciona un pozo para ver su performance temporal</div>
-                <div className="text-sm">Ve al tab "Well Summary" para seleccionar un pozo</div>
+                <div className="text-sm">Ve al tab &quot;Well Summary&quot; para seleccionar un pozo</div>
               </div>
             </div>
           )}

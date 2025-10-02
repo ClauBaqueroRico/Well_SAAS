@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useDashboardFilter } from '../providers/dashboard-filter-provider'
 
 interface DashboardStats {
@@ -14,20 +14,10 @@ export function DashboardCards() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   
-  // Obtener filtros con manejo de errores
-  let selectedContract = ''
-  try {
-    const { selectedContract: contract } = useDashboardFilter()
-    selectedContract = contract
-  } catch (error) {
-    console.log('DashboardFilter not available, using empty filter')
-  }
+  // Obtener filtros directamente
+  const { selectedContract } = useDashboardFilter()
 
-  useEffect(() => {
-    fetchDashboardStats()
-  }, [selectedContract])
-
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = useCallback(async () => {
     try {
       setLoading(true)
       const wellsUrl = selectedContract 
@@ -71,7 +61,11 @@ export function DashboardCards() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedContract])
+
+  useEffect(() => {
+    fetchDashboardStats()
+  }, [fetchDashboardStats])
 
   if (loading || !stats) {
     return (

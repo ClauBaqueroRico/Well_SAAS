@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useDashboardFilter } from '../providers/dashboard-filter-provider'
 
 interface ProductionData {
@@ -27,20 +27,10 @@ export function ProductionChart() {
   const [loading, setLoading] = useState(true)
   const [totalWells, setTotalWells] = useState(0)
   
-  // Obtener filtros con manejo de errores
-  let selectedContract = ''
-  try {
-    const { selectedContract: contract } = useDashboardFilter()
-    selectedContract = contract
-  } catch (error) {
-    console.log('DashboardFilter not available, using empty filter')
-  }
+  // Obtener filtros directamente
+  const { selectedContract } = useDashboardFilter()
 
-  useEffect(() => {
-    fetchProductionData()
-  }, [selectedContract])
-
-  const fetchProductionData = async () => {
+  const fetchProductionData = useCallback(async () => {
     try {
       setLoading(true)
       const url = selectedContract 
@@ -72,7 +62,11 @@ export function ProductionChart() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedContract])
+
+  useEffect(() => {
+    fetchProductionData()
+  }, [fetchProductionData])
 
   const generateMonthlyProductionData = (wells: Well[]): ProductionData[] => {
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
