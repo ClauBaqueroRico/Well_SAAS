@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboardFilter } from '../providers/dashboard-filter-provider'
 
@@ -27,20 +27,10 @@ export function WellsOverview() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   
-  // Obtener filtros pero con un try-catch para evitar errores
-  let selectedContract = ''
-  try {
-    const { selectedContract: contract } = useDashboardFilter()
-    selectedContract = contract
-  } catch (error) {
-    console.log('DashboardFilter not available, using empty filter')
-  }
+  // Obtener filtros directamente (siempre debe estar disponible en el dashboard)
+  const { selectedContract } = useDashboardFilter()
 
-  useEffect(() => {
-    fetchWells()
-  }, [selectedContract])
-
-  const fetchWells = async () => {
+  const fetchWells = useCallback(async () => {
     try {
       setLoading(true)
       const url = selectedContract 
@@ -62,7 +52,11 @@ export function WellsOverview() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedContract])
+
+  useEffect(() => {
+    fetchWells()
+  }, [fetchWells])
 
   if (loading) {
     return (

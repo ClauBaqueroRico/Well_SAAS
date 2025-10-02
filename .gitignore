@@ -37,7 +37,7 @@ yarn-error.log*
 .idea/
 
 # Example files
-Archivos_ej/
+/Archivos_ej
 
 #Check
 check-db.js
