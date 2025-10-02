@@ -47,7 +47,7 @@ const handler = NextAuth({
           return {
             id: user.id,
             email: user.email,
-            name: user.name,
+            name: user.name || user.email.split('@')[0], // Usar email como fallback si name es null
             role: user.role,
           }
         } catch (error) {
