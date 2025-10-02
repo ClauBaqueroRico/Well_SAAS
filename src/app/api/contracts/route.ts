@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         status: data.status,
         description: data.description,
         targetDepth: data.targetDepth,
-        expectedDays: data.plannedWells,
+        expectedDays: data.expectedDays,
         dailyRate: data.dailyRate,
         userId: data.userId || 'default-user-id' // Temporal
       },
