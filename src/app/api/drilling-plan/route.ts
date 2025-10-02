@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         operation: planData?.operation || actualData?.operation || null,
         variance: planData && actualData ? 
           ((actualData.depth - planData.depthTo) / planData.depthTo * 100) : null,
-        efficiency: planData && actualData && planData.plannedROP > 0 ? 
+        efficiency: planData && actualData && planData.plannedROP > 0 && actualData.rop !== null ? 
           (actualData.rop / planData.plannedROP * 100) : null
       })
     }
