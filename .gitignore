@@ -36,6 +36,9 @@ yarn-error.log*
 .vscode/settings.json
 .idea/
 
+# Example files
+Archivos_ej/
+
 #Check
 check-db.js
 check-database-complete.js
