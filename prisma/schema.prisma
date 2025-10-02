@@ -1,0 +1,386 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  accounts Account[]
+  sessions Session[]
+  wells    Well[]
+  contracts Contract[]
+  reports   Report[]
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  logo        String?  // URL del logo del cliente
+  contactName String?
+  contactEmail String?
+  contactPhone String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  contracts   Contract[]
+}
+
+model Contract {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  value       Float    // Valor del contrato
+  currency    String   @default("USD")
+  status      String   @default("active") // active, completed, cancelled, suspended
+  conditions  String?  // Condiciones especiales del contrato
+  terms       String?  // Términos y condiciones
+  logo        String?  // Logo específico para el contrato
+  contractType String  @default("drilling") // drilling, completion, workover
+  
+  // Configuración específica para contratos de perforación
+  drillingConfig String? // Configuración JSON para actividades de perforación
+  targetDepth    Float?   // Profundidad objetivo total
+  expectedDays   Int?     // Días esperados para completar
+  dailyRate      Float?   // Tarifa diaria
+  bonusStructure String?    // Estructura de bonos por rendimiento
+  
+  clientId    String
+  userId      String   // Usuario responsable
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fields      Field[]
+  activities  ContractActivity[]
+}
+
+model Field {
+  id          String   @id @default(cuid())
+  name        String
+  location    String
+  description String?
+  latitude    Float?   // Coordenada de latitud
+  longitude   Float?   // Coordenada de longitud
+  contractId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  wells       Well[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Well {
+  id              String   @id @default(cuid())
+  name            String
+  location        String
+  status          String   @default("active")
+  production      Float    @default(0)
+  pressure        Float    @default(0)
+  temperature     Float    @default(0)
+  lastMaintenance DateTime?
+  depth           Float?   // Profundidad del pozo
+  diameter        Float?   // Diámetro del pozo
+  wellType        String?  // Tipo de pozo: vertical, horizontal, direccional
+  latitude        Float?   // Coordenada de latitud
+  longitude       Float?   // Coordenada de longitud
+  
+  // Nuevos campos técnicos avanzados
+  formation       String?  // Formación geológica principal
+  holeSection     String?  // Sección del hoyo: surface, intermediate, production
+  operation       String?  // Operación actual: drilling, completion, testing, production
+  mudType         String?  // Tipo de lodo: water-based, oil-based, synthetic
+  mudDensity      Float?   // Densidad del lodo (ppg)
+  casingSize      String?  // Tamaño de casing
+  drillPipeSize   String?  // Tamaño de drill pipe
+  bitType         String?  // Tipo de broca
+  bitSize         Float?   // Tamaño de broca (pulgadas)
+  flowRate        Float?   // Caudal de bomba (gpm)
+  rotarySpeed     Float?   // Velocidad de rotación (rpm)
+  weightOnBit     Float?   // Peso sobre la broca (klbs)
+  torque          Float?   // Torque (ft-lbs)
+  standpipePressure Float? // Presión en standpipe (psi)
+  
+  // Datos geológicos
+  formationTop    Float?   // Tope de formación (ft/m)
+  formationBottom Float?   // Base de formación (ft/m)
+  lithology       String?  // Litología
+  porosity        Float?   // Porosidad (%)
+  permeability    Float?   // Permeabilidad (mD)
+  
+  // Datos de perforación para reportes
+  initialDate     DateTime?
+  actualDate      DateTime?
+  elapsedDays     Float?
+  elapsedHours    Float?
+  initialDepth    Float?
+  finalDepth      Float?
+  ropAverage      Float?   // Rate of Penetration Average
+  ropEffective    Float?   // Rate of Penetration Effective
+  footage         Float?   // Footage total
+  wellConstructionRate Float? // Well Construction Rate Average
+  directionalDifficulty String? // Difficulty index
+  maxIncl         Float?   // Maximum inclination
+  
+  // Datos económicos
+  budgetAFE       Float?   // Budget AFE (Authorization for Expenditure)
+  actualCost      Float?   // Costo real
+  dailyRate       Float?   // Tarifa diaria
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  userId          String
+  fieldId         String?  // Campo al que pertenece
+  
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  field           Field?            @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+  productionData  ProductionData[]
+  drillingData    DrillingData[]
+  drillingPlan    DrillingPlan[]
+}
+
+model ProductionData {
+  id         String   @id @default(cuid())
+  wellId     String
+  production Float
+  pressure   Float
+  temperature Float
+  recordDate DateTime @default(now())
+  
+  well       Well     @relation(fields: [wellId], references: [id], onDelete: Cascade)
+}
+
+model DrillingData {
+  id          String   @id @default(cuid())
+  wellId      String
+  date        DateTime @default(now())
+  day         Int      // Día de perforación
+  depth       Float    // Profundidad alcanzada
+  plan        Float    // Profundidad planeada
+  progressM   Float    // Progreso en metros
+  rop         Float?   // Rate of Penetration
+  mud         String?  // Tipo de lodo
+  pressure    Float?   // Presión
+  temperature Float?   // Temperatura
+  status      String   @default("drilling") // drilling, tripping, maintenance, waiting
+  shift       String   @default("day") // day, night
+  crew        String?  // Equipo de trabajo
+  contractor  String?  // Contratista
+  
+  // Nuevos campos técnicos detallados
+  formation   String?  // Formación actual
+  holeSection String?  // Sección del hoyo
+  operation   String?  // Operación específica
+  
+  // Parámetros de perforación
+  mudDensity      Float?   // Densidad del lodo (ppg)
+  mudViscosity    Float?   // Viscosidad del lodo
+  flowRate        Float?   // Caudal (gpm)
+  rotarySpeed     Float?   // RPM
+  weightOnBit     Float?   // WOB (klbs)
+  torque          Float?   // Torque (ft-lbs)
+  standpipePressure Float? // Standpipe pressure (psi)
+  
+  // Parámetros geológicos
+  lithology       String?  // Litología encontrada
+  gasDetection    Float?   // Detección de gas (units)
+  cuttingsReturn  String?  // Retorno de cortes
+  
+  // Métricas de calidad
+  holeCleanling   Float?   // Limpieza del hoyo (1-10)
+  vibration       Float?   // Vibración (0-10)
+  deviation       Float?   // Desviación (grados)
+  
+  // Tiempos operacionales
+  drillingTime    Float?   // Tiempo de perforación (hrs)
+  connectionTime  Float?   // Tiempo de conexión (hrs)
+  circulationTime Float?   // Tiempo de circulación (hrs)
+  trippingTime    Float?   // Tiempo de viaje (hrs)
+  
+  // Actividades específicas del contrato
+  contractActivity String? // Actividad según configuración del contrato
+  efficiency      Float?  // Eficiencia de la actividad (0-100%)
+  complications   String?   // Complicaciones o eventos especiales
+  
+  wellOperations String?   // Operaciones específicas del pozo
+  safetyMetrics  String?   // Métricas de seguridad
+  equipment      String?   // Equipos utilizados
+  consumables    String?   // Consumibles utilizados
+  
+  // Costos
+  dailyCost      Float?   // Costo diario
+  cumulativeCost Float?   // Costo acumulado
+  
+  recordDate  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  well        Well     @relation(fields: [wellId], references: [id], onDelete: Cascade)
+}
+
+// Nueva tabla para actividades específicas de contratos
+model ContractActivity {
+  id           String   @id @default(cuid())
+  contractId   String
+  name         String   // Nombre de la actividad
+  description  String?  // Descripción de la actividad
+  category     String   // Categoría: drilling, completion, testing, maintenance
+  unit         String   // Unidad de medida: meters, hours, days, pieces
+  targetValue  Float    // Valor objetivo
+  priority     Int      @default(1) // Prioridad 1-5
+  isActive     Boolean  @default(true)
+  
+  // Configuración de rendimiento
+  minRate      Float?   // Tasa mínima aceptable
+  maxRate      Float?   // Tasa máxima esperada
+  optimalRate  Float?   // Tasa óptima
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  contract     Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+// Tabla para el plan detallado de perforación
+model DrillingPlan {
+  id          String   @id @default(cuid())
+  wellId      String
+  day         Int      // Día planificado (1, 2, 3, etc.)
+  depthFrom   Float    // Profundidad inicial para este día
+  depthTo     Float    // Profundidad objetivo para este día
+  plannedROP  Float    // ROP planificado (m/hr)
+  plannedHours Float   // Horas planificadas de perforación
+  formation   String?  // Formación esperada
+  holeSection String?  // Sección del hoyo
+  operation   String?  // Operación planificada
+  
+  // Parámetros planificados
+  mudType     String?  // Tipo de lodo planificado
+  mudDensity  Float?   // Densidad planificada
+  bitType     String?  // Tipo de broca planificada
+  bitSize     Float?   // Tamaño de broca
+  
+  // Configuración de perforación planificada
+  flowRate    Float?   // Caudal planificado (gpm)
+  rotarySpeed Float?   // RPM planificado
+  weightOnBit Float?   // WOB planificado (klbs)
+  
+  // Estimaciones de tiempo
+  drillingTime    Float?  // Tiempo estimado de perforación
+  connectionTime  Float?  // Tiempo estimado de conexión
+  circulationTime Float?  // Tiempo estimado de circulación
+  trippingTime    Float?  // Tiempo estimado de viaje
+  
+  // Costos planificados
+  dailyCost     Float?  // Costo diario planificado
+  consumablesCost Float? // Costo de consumibles
+  equipmentCost Float?  // Costo de equipo
+  
+  // Riesgos y contingencias
+  riskLevel     String? // Nivel de riesgo: low, medium, high
+  contingencyTime Float? // Tiempo de contingencia (hrs)
+  complications String? // Complicaciones esperadas
+  
+  // Calidad esperada
+  expectedEfficiency Float? // Eficiencia esperada (0-100%)
+  qualityTargets     String? // Objetivos de calidad
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  well        Well     @relation(fields: [wellId], references: [id], onDelete: Cascade)
+}
+
+// Nueva tabla para reportes generados
+model Report {
+  id           String   @id @default(cuid())
+  title        String   // Título del reporte
+  description  String?  // Descripción del reporte
+  reportType   String   // Tipo: daily, weekly, monthly, custom, comparative
+  format       String   // Formato: pdf, excel, csv
+  status       String   @default("generated") // generated, sent, archived
+  
+  // Filtros aplicados
+  dateFrom     DateTime?
+  dateTo       DateTime?
+  wellIds      String?  // JSON array of well IDs
+  contractIds  String?  // JSON array of contract IDs
+  fieldIds     String?  // JSON array of field IDs
+  formations   String?  // JSON array of formations
+  operations   String?  // JSON array of operations
+  
+  // Configuración del reporte
+  includeCharts Boolean @default(true)
+  includeData   Boolean @default(true)
+  includeSummary Boolean @default(true)
+  includeComparisons Boolean @default(false)
+  
+  // Datos generados
+  fileUrl      String?  // URL del archivo generado
+  fileSize     Int?     // Tamaño del archivo en bytes
+  recordCount  Int?     // Número de registros incluidos
+  
+  // Metadatos
+  generatedBy  String   // Usuario que generó el reporte
+  generatedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [generatedBy], references: [id], onDelete: Cascade)
+}

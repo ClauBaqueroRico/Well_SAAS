@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+}
+
+/* Forzar tema claro siempre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 255, 255, 255;
+    --background-end-rgb: 255, 255, 255;
+  }
+}
+
+body {
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+
+/* Forzar texto negro en todos los elementos */
+* {
+  color: #000000 !important;
+}
+
+/* Excepciones para elementos que necesitan colores específicos */
+.text-white,
+.text-white *,
+button.bg-blue-600,
+button.bg-blue-600 *,
+button.bg-green-600,
+button.bg-green-600 *,
+button.bg-red-600,
+button.bg-red-600 *,
+.bg-blue-600,
+.bg-blue-600 *,
+.bg-green-600,
+.bg-green-600 *,
+.bg-red-600,
+.bg-red-600 * {
+  color: #ffffff !important;
+}
+
+/* Colores específicos para estados */
+.text-green-600,
+.text-green-800 {
+  color: #059669 !important;
+}
+
+.text-blue-600,
+.text-blue-800 {
+  color: #2563eb !important;
+}
+
+.text-red-600,
+.text-red-800 {
+  color: #dc2626 !important;
+}
+
+.text-yellow-600,
+.text-yellow-800 {
+  color: #d97706 !important;
+}
+
+.text-orange-600,
+.text-orange-800 {
+  color: #ea580c !important;
+}
+
+.text-gray-500,
+.text-gray-600 {
+  color: #6b7280 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+}
+
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Asegurar que los inputs siempre sean visibles */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  background-color: white !important;
+  color: #000000 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="text"]::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Asegurar visibilidad en selectores */
+select option {
+  background-color: white !important;
+  color: #000000 !important;
+}
+
+/* Botones con fondo específico mantienen texto blanco */
+button[class*="bg-blue"],
+button[class*="bg-green"],
+button[class*="bg-red"],
+button[class*="bg-yellow"],
+button[class*="bg-orange"] {
+  color: #ffffff !important;
+}
+
+/* Links y elementos interactivos */
+a {
+  color: #2563eb !important;
+}
+
+a:hover {
+  color: #1d4ed8 !important;
+}
