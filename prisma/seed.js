@@ -146,21 +146,12 @@ function generateProductionData(wellId, baseProduction) {
 // Generar datos de plan de perforación para cada pozo
 function generateDrillingPlan(wellId, totalDepth = 8500) {
   const planData = []
-  const formations = ['Surface', 'Intermediate', 'Production', 'Eagle Ford']
   let currentDepth = 0
   
-  for (let day = 1; day <= 15; day++) {
+  for (let day = 1; day <= 10; day++) {
     const depthIncrement = Math.floor(Math.random() * 600) + 400 // 400-1000 ft por día
     const newDepth = Math.min(currentDepth + depthIncrement, totalDepth)
-    
-    // Determinar formación basada en profundidad
-    let formation = 'Surface'
-    if (newDepth > 1500) formation = 'Intermediate'
-    if (newDepth > 3000) formation = 'Production'
-    if (newDepth > 5000) formation = 'Eagle Ford'
-    
     const plannedROP = 150 + Math.floor(Math.random() * 200) // 150-350 ft/hr
-    const operation = day <= 12 ? 'drilling' : 'completion'
     const plannedHours = Math.round((newDepth - currentDepth) / plannedROP * 100) / 100
     
     planData.push({
@@ -169,18 +160,9 @@ function generateDrillingPlan(wellId, totalDepth = 8500) {
       depthFrom: currentDepth,
       depthTo: newDepth,
       plannedROP,
-      plannedHours,
-      operation,
-      formation,
-      holeSection: newDepth < 2000 ? 'surface' : newDepth < 5000 ? 'intermediate' : 'production',
-      mudType: 'water-based',
-      mudDensity: 8.5 + Math.random() * 2,
-      bitType: 'PDC',
-      bitSize: 8.5 + Math.random() * 1,
-      flowRate: 400 + Math.random() * 200,
-      rotarySpeed: 100 + Math.random() * 50,
-      weightOnBit: 20 + Math.random() * 20,
-      daysElapsed: day
+      plannedHours: Math.max(1, plannedHours), // Asegurar que sea al menos 1 hora
+      formation: currentDepth < 2000 ? 'Surface' : currentDepth < 5000 ? 'Intermediate' : 'Eagle Ford',
+      operation: day <= 8 ? 'drilling' : 'completion'
     })
     
     currentDepth = newDepth
@@ -195,14 +177,14 @@ function generateDrillingData(wellId, planData) {
   const drillingData = []
   const startDate = new Date('2024-01-01')
   
-  for (let i = 0; i < Math.min(12, planData.length); i++) {
+  for (let i = 0; i < Math.min(8, planData.length); i++) {
     const plan = planData[i]
     const date = new Date(startDate)
     date.setDate(date.getDate() + i)
     
     // Generar variaciones realistas del plan
-    const depthVariation = (Math.random() - 0.5) * 200 // ±100 ft
-    const ropVariation = (Math.random() - 0.5) * 50 // ±25 ft/hr
+    const depthVariation = (Math.random() - 0.5) * 100 // ±50 ft
+    const ropVariation = (Math.random() - 0.5) * 30 // ±15 ft/hr
     
     const actualDepth = Math.max(plan.depthFrom, plan.depthTo + depthVariation)
     const actualROP = Math.max(50, plan.plannedROP + ropVariation)
@@ -212,14 +194,11 @@ function generateDrillingData(wellId, planData) {
       date,
       depth: Math.round(actualDepth),
       rop: Math.round(actualROP),
-      mudDensity: 8.5 + Math.random() * 3, // 8.5-11.5 ppg
-      pressure: 500 + i * 200 + Math.random() * 300,
-      temperature: 80 + i * 5 + Math.random() * 20,
-      rotarySpeed: 100 + Math.random() * 50,
-      weightOnBit: 20 + Math.random() * 30,
-      standpipePressure: 1000 + i * 150 + Math.random() * 500,
-      operation: plan.operation,
-      formation: plan.formation
+      mudDensity: 8.5 + Math.random() * 2, // 8.5-10.5 ppg
+      pressure: 500 + i * 200 + Math.random() * 200,
+      temperature: 80 + i * 3 + Math.random() * 10,
+      operation: plan.operation || 'drilling',
+      formation: plan.formation || 'Surface'
     })
   }
   
