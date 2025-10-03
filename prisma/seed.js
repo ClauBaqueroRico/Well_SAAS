@@ -143,12 +143,87 @@ function generateProductionData(wellId, baseProduction) {
   return data
 }
 
+// Generar datos de plan de perforación para cada pozo
+function generateDrillingPlan(wellId, totalDepth = 8500) {
+  const planData = []
+  const formations = ['Surface', 'Intermediate', 'Production', 'Eagle Ford']
+  let currentDepth = 0
+  
+  for (let day = 1; day <= 15; day++) {
+    const depthIncrement = Math.floor(Math.random() * 600) + 400 // 400-1000 ft por día
+    const newDepth = Math.min(currentDepth + depthIncrement, totalDepth)
+    
+    // Determinar formación basada en profundidad
+    let formation = 'Surface'
+    if (newDepth > 1500) formation = 'Intermediate'
+    if (newDepth > 3000) formation = 'Production'
+    if (newDepth > 5000) formation = 'Eagle Ford'
+    
+    const plannedROP = 150 + Math.floor(Math.random() * 200) // 150-350 ft/hr
+    const operation = day <= 12 ? 'drilling' : 'completion'
+    
+    planData.push({
+      wellId,
+      day,
+      depthFrom: currentDepth,
+      depthTo: newDepth,
+      plannedROP,
+      operation,
+      formation,
+      daysElapsed: day
+    })
+    
+    currentDepth = newDepth
+    if (currentDepth >= totalDepth) break
+  }
+  
+  return planData
+}
+
+// Generar datos reales de perforación basados en el plan
+function generateDrillingData(wellId, planData) {
+  const drillingData = []
+  const startDate = new Date('2024-01-01')
+  
+  for (let i = 0; i < Math.min(12, planData.length); i++) {
+    const plan = planData[i]
+    const date = new Date(startDate)
+    date.setDate(date.getDate() + i)
+    
+    // Generar variaciones realistas del plan
+    const depthVariation = (Math.random() - 0.5) * 200 // ±100 ft
+    const ropVariation = (Math.random() - 0.5) * 50 // ±25 ft/hr
+    
+    const actualDepth = Math.max(plan.depthFrom, plan.depthTo + depthVariation)
+    const actualROP = Math.max(50, plan.plannedROP + ropVariation)
+    
+    drillingData.push({
+      wellId,
+      date,
+      depth: Math.round(actualDepth),
+      rop: Math.round(actualROP),
+      mudDensity: 8.5 + Math.random() * 3, // 8.5-11.5 ppg
+      pressure: 500 + i * 200 + Math.random() * 300,
+      temperature: 80 + i * 5 + Math.random() * 20,
+      rotarySpeed: 100 + Math.random() * 50,
+      weightOnBit: 20 + Math.random() * 30,
+      standpipePressure: 1000 + i * 150 + Math.random() * 500,
+      operation: plan.operation,
+      formation: plan.formation
+    })
+  }
+  
+  return drillingData
+}
+
 async function seed() {
   try {
     console.log('🌱 Iniciando seed de la base de datos...')
     
     // Limpiar datos existentes
     await prisma.productionData.deleteMany()
+    await prisma.drillingData.deleteMany()
+    await prisma.drillingPlan.deleteMany()
     await prisma.well.deleteMany()
     await prisma.field.deleteMany()
     await prisma.contract.deleteMany()
@@ -279,6 +354,36 @@ async function seed() {
     
     console.log(`📈 ${totalRecords} registros de datos históricos creados`)
     
+    // Generar datos de plan de perforación y progreso real
+    console.log('🎯 Generando datos de plan de perforación...')
+    let totalPlanRecords = 0
+    let totalDrillingRecords = 0
+    
+    for (const well of wells) {
+      // Generar plan de perforación
+      const planData = generateDrillingPlan(well.id, well.depth || 8500)
+      
+      for (const plan of planData) {
+        await prisma.drillingPlan.create({
+          data: plan
+        })
+        totalPlanRecords++
+      }
+      
+      // Generar datos reales de perforación
+      const drillingData = generateDrillingData(well.id, planData)
+      
+      for (const drilling of drillingData) {
+        await prisma.drillingData.create({
+          data: drilling
+        })
+        totalDrillingRecords++
+      }
+    }
+    
+    console.log(`🎯 ${totalPlanRecords} registros de plan de perforación creados`)
+    console.log(`⚡ ${totalDrillingRecords} registros de progreso real creados`)
+    
     // Mostrar resumen
     const wellsCount = await prisma.well.count()
     const usersCount = await prisma.user.count()
@@ -286,6 +391,8 @@ async function seed() {
     const contractsCount = await prisma.contract.count()
     const fieldsCount = await prisma.field.count()
     const productionCount = await prisma.productionData.count()
+    const planCount = await prisma.drillingPlan.count()
+    const drillingCount = await prisma.drillingData.count()
     
     console.log('\n✅ Seed completado exitosamente!')
     console.log('📋 Resumen:')
@@ -295,6 +402,8 @@ async function seed() {
     console.log(`   🏞️ Campos: ${fieldsCount}`)
     console.log(`   🛢️ Pozos: ${wellsCount}`)
     console.log(`   📊 Registros de producción: ${productionCount}`)
+    console.log(`   🎯 Planes de perforación: ${planCount}`)
+    console.log(`   ⚡ Datos de perforación: ${drillingCount}`)
     
     console.log('\n🔑 Credenciales de acceso:')
     console.log('   📧 Admin: admin@wellwizards.com')
