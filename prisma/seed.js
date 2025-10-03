@@ -161,6 +161,7 @@ function generateDrillingPlan(wellId, totalDepth = 8500) {
     
     const plannedROP = 150 + Math.floor(Math.random() * 200) // 150-350 ft/hr
     const operation = day <= 12 ? 'drilling' : 'completion'
+    const plannedHours = Math.round((newDepth - currentDepth) / plannedROP * 100) / 100
     
     planData.push({
       wellId,
@@ -168,8 +169,17 @@ function generateDrillingPlan(wellId, totalDepth = 8500) {
       depthFrom: currentDepth,
       depthTo: newDepth,
       plannedROP,
+      plannedHours,
       operation,
       formation,
+      holeSection: newDepth < 2000 ? 'surface' : newDepth < 5000 ? 'intermediate' : 'production',
+      mudType: 'water-based',
+      mudDensity: 8.5 + Math.random() * 2,
+      bitType: 'PDC',
+      bitSize: 8.5 + Math.random() * 1,
+      flowRate: 400 + Math.random() * 200,
+      rotarySpeed: 100 + Math.random() * 50,
+      weightOnBit: 20 + Math.random() * 20,
       daysElapsed: day
     })
     
