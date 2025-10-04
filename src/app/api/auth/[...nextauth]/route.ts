@@ -13,45 +13,53 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         try {
-          console.log('Intentando autenticar:', credentials?.email)
+          console.log('🔐 NextAuth - Intentando autenticar:', credentials?.email)
+          console.log('🔐 NextAuth - Password recibido:', credentials?.password ? '****' : 'VACÍO')
           
           if (!credentials?.email || !credentials?.password) {
-            console.log('Credenciales faltantes')
+            console.log('❌ NextAuth - Credenciales faltantes')
             return null
           }
 
+          console.log('🔍 NextAuth - Buscando usuario en BD...')
           const user = await prisma.user.findUnique({
             where: { email: credentials.email }
           })
 
-          console.log('Usuario encontrado:', !!user)
+          console.log('👤 NextAuth - Usuario encontrado:', !!user)
+          if (user) {
+            console.log('👤 NextAuth - User ID:', user.id)
+            console.log('👤 NextAuth - User Role:', user.role)
+            console.log('👤 NextAuth - Hash length:', user.password.length)
+          }
 
           if (!user) {
-            console.log('Usuario no encontrado')
+            console.log('❌ NextAuth - Usuario no encontrado en BD')
             return null
           }
 
+          console.log('🔑 NextAuth - Comparando passwords...')
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password
           )
 
-          console.log('Contraseña válida:', isPasswordValid)
+          console.log('🔑 NextAuth - Contraseña válida:', isPasswordValid)
 
           if (!isPasswordValid) {
-            console.log('Contraseña incorrecta')
+            console.log('❌ NextAuth - Contraseña incorrecta')
             return null
           }
 
-          console.log('Autenticación exitosa para:', user.email)
+          console.log('✅ NextAuth - Autenticación exitosa para:', user.email)
           return {
             id: user.id,
             email: user.email,
-            name: user.name || user.email.split('@')[0], // Usar email como fallback si name es null
+            name: user.name || user.email.split('@')[0],
             role: user.role,
           }
         } catch (error) {
-          console.error('Error en authorize:', error)
+          console.error('💥 NextAuth - Error en authorize:', error)
           return null
         }
       }
