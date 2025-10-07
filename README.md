@@ -2,7 +2,7 @@
 
 Un sistema SaaS completo para la gestión y análisis de datos de pozos petrolíferos, construido con tecnologías modernas.
 
-## 🚀 Características
+## Características
 
 - **Autenticación Segura**: Sistema de login con NextAuth.js
 - **Dashboard Interactivo**: Visualización en tiempo real de datos de pozos
@@ -20,7 +20,7 @@ Un sistema SaaS completo para la gestión y análisis de datos de pozos petrolí
 - **Panel de Administración**: Gestión de usuarios y configuración
 - **Responsive Design**: Interfaz optimizada para todos los dispositivos
 
-### ✨ Funcionalidades Nuevas
+### Funcionalidades Nuevas
 
 - **Campos Técnicos Avanzados**: Formation, hole section, operation, mud type, bit type, etc.
 - **Plan vs Real Analysis**: Sistema completo de comparación entre progreso planificado y real
@@ -35,7 +35,7 @@ Un sistema SaaS completo para la gestión y análisis de datos de pozos petrolí
 - **Time Performance Rediseñado**: Análisis individual de pozos con Plan vs Real
 - **API de Plan vs Real**: Endpoints para obtener datos combinados de planificación y progreso real
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 - **Framework**: Next.js 14 con App Router
 - **Lenguaje**: TypeScript
@@ -65,7 +65,7 @@ src/
 └── prisma/             # Schema de base de datos
 ```
 
-## 🚦 Instalación y Configuración
+## Instalación y Configuración
 
 ### 1. Instalar Dependencias
 
@@ -149,7 +149,7 @@ npm run create-admin
 - **Supervisor**: miguel@wellwizards.com / password123
 - **Analista**: sofia@wellwizards.com / password123
 
-## 🎯 Funcionalidades Principales
+## Funcionalidades Principales
 
 ### Dashboard Principal
 - Resumen de pozos activos
@@ -185,7 +185,7 @@ npm run create-admin
 - **Filtros Avanzados**: Fechas, pozos, contratos, formaciones, operaciones
 - **Preview en Tiempo Real**: Vista previa de datos antes de generar
 
-## 🔒 Autenticación
+## Autenticación
 
 El sistema utiliza NextAuth.js con:
 - Autenticación por credenciales
@@ -203,14 +203,14 @@ El sistema utiliza NextAuth.js con:
 
 Los usuarios pueden registrarse accediendo a `/auth/register` o hacer clic en "Regístrate aquí" desde la página principal.
 
-## 🎨 Diseño
+## Diseño
 
 - Interfaz moderna con Tailwind CSS
 - Componentes responsive
 - Tema consistente con colores Well Wizards
 - Iconos y elementos visuales intuitivos
 
-## 📊 Integración con Well Wizards
+## Integración con Well Wizards
 
 El sistema está diseñado para integrarse con datos de Well Wizards:
 - API REST para importar datos
@@ -238,7 +238,7 @@ npm run db:migrate # Ejecutar migraciones
 - Nombres descriptivos en español
 - Documentación en código
 
-## 📝 Próximos Pasos
+## Próximos Pasos
 
 - [ ] Implementar sistema de notificaciones
 - [ ] Agregar más tipos de gráficos
@@ -247,7 +247,7 @@ npm run db:migrate # Ejecutar migraciones
 - [ ] Integración con servicios externos
 - [ ] Análisis predictivo con IA
 
-## 🤝 Contribución
+## Contribución
 
 1. Fork el proyecto
 2. Crea una rama para tu feature
